@@ -34,8 +34,19 @@ def init_db_if_not_exists():
         key TEXT NOT NULL,
         value TEXT NOT NULL,
         updated_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(telegram_id) ON DELETE CASCADE,
         UNIQUE(user_id, key)
     )''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS conversations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        user_message TEXT NOT NULL,
+        bot_reply TEXT NOT NULL,
+        timestamp TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(telegram_id) ON DELETE CASCADE
+    )''')
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_memory_uid ON user_memory(user_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_conv_uid ON conversations(user_id)")
     conn.commit()
     conn.close()
 

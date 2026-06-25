@@ -92,8 +92,9 @@ class UserDatabase:
                 (user_id, display_name[:100], now, now)
             )
             conn.commit()
+            added = cursor.rowcount > 0
             conn.close()
-            return cursor.rowcount > 0
+            return added
         except Exception as e:
             logger.error(f"❌ خطا در افزودن کاربر: {e}")
             return False
@@ -224,3 +225,67 @@ class UserDatabase:
                 'conversation_count': conv_count
             }
         return {}
+
+    # ── Web Panel Methods ──
+
+    def panel_get_all_users(self, search: str = None) -> List[Dict]:
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        if search:
+            like = f"%{search}%"
+            cursor.execute(
+                "SELECT * FROM users WHERE display_name LIKE ? OR CAST(telegram_id AS TEXT) LIKE ? ORDER BY last_activity DESC",
+                (like, like)
+            )
+        else:
+            cursor.execute("SELECT * FROM users ORDER BY last_activity DESC")
+        rows = [dict(r) for r in cursor.fetchall()]
+        conn.close()
+        return rows
+
+    def panel_get_user(self, telegram_id: int) -> Optional[Dict]:
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE telegram_id = ?", (telegram_id,))
+        row = cursor.fetchone()
+        conn.close()
+        return dict(row) if row else None
+
+    def panel_get_memory(self, user_id: int) -> List[Dict]:
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT key, value, updated_at FROM user_memory WHERE user_id = ? ORDER BY updated_at DESC",
+            (user_id,)
+        )
+        rows = [dict(r) for r in cursor.fetchall()]
+        conn.close()
+        return rows
+
+    def panel_get_history(self, user_id: int) -> List[Dict]:
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT user_message, bot_reply, timestamp FROM conversations WHERE user_id = ? ORDER BY id DESC LIMIT 100",
+            (user_id,)
+        )
+        rows = [dict(r) for r in cursor.fetchall()]
+        conn.close()
+        rows.reverse()
+        return rows
+
+    def panel_get_stats(self) -> Dict:
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) as c FROM users")
+        total_users = cursor.fetchone()['c']
+        cursor.execute("SELECT COALESCE(SUM(message_count), 0) as c FROM users")
+        total_messages = cursor.fetchone()['c']
+        cursor.execute("SELECT COUNT(*) as c FROM conversations")
+        total_conversations = cursor.fetchone()['c']
+        conn.close()
+        return {
+            'total_users': total_users,
+            'total_messages': total_messages,
+            'total_conversations': total_conversations,
+        }

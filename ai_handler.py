@@ -128,5 +128,6 @@ class AIHandler:
         try:
             self.client.models.list()
             return True
-        except:
+        except Exception as e:
+            logger.warning(f"⚠️ health_check ناموفق: {e}")
             return False

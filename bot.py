@@ -89,7 +89,7 @@ def remove_user_command(message):
 @bot.callback_query_handler(func=lambda call: call.data.startswith('confirm_remove_'))
 def confirm_remove_callback(call):
     if not is_admin(call.from_user.id): return
-    user_id = int(call.data.split('_')[2])
+    user_id = int(call.data.replace('confirm_remove_', ''))
     if db.remove_user(user_id):
         bot.edit_message_text(f"✅ کاربر <code>{user_id}</code> حذف شد.", call.message.chat.id, call.message.message_id, parse_mode='HTML')
 
@@ -136,7 +136,9 @@ def broadcast_command(message):
             bot.send_message(user_id, f"📢 <b>پیام مدیریت:</b>\n\n{html.escape(text)}", parse_mode='HTML')
             success += 1
             time.sleep(0.05) # جلوگیری از محدودیت تلگرام
-        except: failed += 1
+        except Exception as e:
+            logger.warning(f"❌ خطا در ارسال broadcast به {user_id}: {e}")
+            failed += 1
     bot.reply_to(message, f"✅ ارسال تمام شد\n\nموفق: {success}\nناموفق: {failed}", parse_mode='HTML')
 
 # ========== دستورات عمومی ==========
@@ -149,6 +151,21 @@ def start_command(message):
 @bot.message_handler(commands=['help'])
 def help_command(message):
     if not is_admin(message.from_user.id) and not db.user_exists(message.from_user.id): return
+    help_text = (
+        "📖 <b>راهنمای بات</b>\n\n"
+        "💬 فقط کافیه پیامت رو بفرستی تا جواب بدم!\n\n"
+        "👤 <b>دستورات کاربران:</b>\n"
+        "/start - شروع گفتگو\n"
+        "/help - نمایش این راهنما\n"
+        "/mystats - آمار شخصی شما\n\n"
+        "🛡️ <b>دستورات ادمین:</b>\n"
+        "/adduser [آیدی] [نام] - افزودن کاربر\n"
+        "/removeuser [آیدی] - حذف کاربر\n"
+        "/listusers - لیست کاربران\n"
+        "/stats - آمار ربات\n"
+        "/broadcast [متن] - پیام همگانی"
+    )
+    bot.reply_to(message, help_text, parse_mode='HTML')
 
 
 @bot.message_handler(commands=['mystats'])
@@ -205,7 +222,8 @@ def handle_message(message):
         logger.error(f"Error processing message from {user_id}: {e}", exc_info=True)
         try:
             bot.reply_to(message, "متأسفم، یه مشکلی پیش اومد. 😔 یه بار دیگه امتحان کن?", parse_mode='HTML')
-        except: pass
+        except Exception as send_err:
+            logger.error(f"❌ خطا در ارسال پیام خطا به کاربر: {send_err}")
 
 @bot.message_handler(content_types=['photo', 'video', 'document', 'audio', 'voice', 'sticker'])
 def handle_media(message):

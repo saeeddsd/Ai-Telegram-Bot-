@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}{{ user.display_name or user.telegram_id }}{% endblock %}
+{% block header %}جزئیات کاربر{% endblock %}
+{% block content %}
+
+<a href="{{ url_for('dashboard') }}" class="back-link">&rarr; بازگشت به داشبورد</a>
+
+<div class="profile-card">
+    <div class="profile-avatar">
+        {{ (user.display_name or '?')[0] | upper }}
+    </div>
+    <div class="profile-info">
+        <h2>{{ user.display_name or 'بدون نام' }}</h2>
+        <p class="profile-id">آیدی تلگرام: <code>{{ user.telegram_id }}</code></p>
+    </div>
+    <div class="profile-stats">
+        <div class="mini-stat">
+            <span class="mini-num">{{ user.message_count }}</span>
+            <span class="mini-label">پیام</span>
+        </div>
+        <div class="mini-stat">
+            <span class="mini-num">{{ memory | length }}</span>
+            <span class="mini-label">حافظه</span>
+        </div>
+        <div class="mini-stat">
+            <span class="mini-num">{{ history | length }}</span>
+            <span class="mini-label">چت</span>
+        </div>
+    </div>
+</div>
+
+<div class="two-col">
+    <!-- بخش حافظه -->
+    <div class="section-card">
+        <h3 class="section-title">حافظه کاربر</h3>
+        {% if memory %}
+        <div class="memory-list">
+            {% for m in memory %}
+            <div class="memory-item">
+                <span class="memory-key">{{ m.key }}</span>
+                <span class="memory-value">{{ m.value }}</span>
+                <span class="memory-time">{{ m.updated_at | fmt_dt }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-msg">حافظه‌ای برای این کاربر ثبت نشده است.</p>
+        {% endif %}
+    </div>
+
+    <!-- بخش اطلاعات حساب -->
+    <div class="section-card">
+        <h3 class="section-title">اطلاعات حساب</h3>
+        <div class="info-rows">
+            <div class="info-row">
+                <span class="info-label">تاریخ عضویت</span>
+                <span class="info-value">{{ user.created_at | fmt_dt }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">آخرین فعالیت</span>
+                <span class="info-value">{{ user.last_activity | fmt_dt }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">نام نمایشی</span>
+                <span class="info-value">{{ user.display_name or '—' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">آیدی تلگرام</span>
+                <span class="info-value"><code>{{ user.telegram_id }}</code></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- تاریخچه چت -->
+<div class="section-card">
+    <h3 class="section-title">تاریخچه چت ({{ history | length }} پیام اخیر)</h3>
+    {% if history %}
+    <div class="chat-container">
+        {% for msg in history %}
+        <div class="chat-pair">
+            <div class="bubble bubble-user">
+                <div class="bubble-label">کاربر</div>
+                <div class="bubble-text">{{ msg.user_message }}</div>
+                <div class="bubble-time">{{ msg.timestamp | fmt_dt }}</div>
+            </div>
+            <div class="bubble bubble-bot">
+                <div class="bubble-label">بات</div>
+                <div class="bubble-text">{{ msg.bot_reply }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-msg">تاریخچه مکالمه‌ای وجود ندارد.</p>
+    {% endif %}
+</div>
+{% endblock %}

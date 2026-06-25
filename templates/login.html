@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}ورود{% endblock %}
+{% block header %}ورود{% endblock %}
+{% block content %}
+<div class="login-center">
+    <form method="POST" class="login-card">
+        <div class="login-avatar">
+            <svg viewBox="0 0 24 24" width="48" height="48"><path fill="#2AABEE" d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <h2>پنل مدیریت بات</h2>
+        <input type="password" name="password" placeholder="رمز عبور را وارد کنید" required autofocus>
+        <button type="submit" class="btn btn-primary btn-block">ورود</button>
+    </form>
+</div>
+{% endblock %}

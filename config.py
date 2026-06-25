@@ -16,10 +16,10 @@ OPENAI_API_KEY = get_env('OPENAI_API_KEY')
 OPENAI_BASE_URL = get_env('OPENAI_BASE_URL', 'https://api.freemodel.dev/v1')
 
 # امنیت
-ADMIN_IDS = [int(x.strip()) for x in get_env('ADMIN_IDS', '').split(',') if x.strip()]
-MAX_USERS = int(get_env('MAX_USERS', '100'))
-RATE_LIMIT_MESSAGES = int(get_env('RATE_LIMIT_MESSAGES', '20'))
-RATE_LIMIT_SECONDS = int(get_env('RATE_LIMIT_SECONDS', '60'))
+ADMIN_IDS = [int(x.strip()) for x in get_env('ADMIN_IDS', '', required=False).split(',') if x.strip()]
+MAX_USERS = int(get_env('MAX_USERS', '100', required=False))
+RATE_LIMIT_MESSAGES = int(get_env('RATE_LIMIT_MESSAGES', '20', required=False))
+RATE_LIMIT_SECONDS = int(get_env('RATE_LIMIT_SECONDS', '60', required=False))
 
 # عملکرد
 MAX_CONVERSATION_HISTORY = int(get_env('MAX_CONVERSATION_HISTORY', '50', False))
@@ -34,6 +34,11 @@ LOGS_PATH = "logs/"
 AI_TIMEOUT = 30
 AI_MAX_TOKENS = 1000
 AI_TEMPERATURE = 0.8
+
+# Web Panel
+PANEL_PASSWORD = get_env('PANEL_PASSWORD', 'admin123', required=False)
+PANEL_PORT = int(get_env('PANEL_PORT', '5000', required=False))
+PANEL_SECRET_KEY = get_env('PANEL_SECRET_KEY', 'change-this-to-a-random-string', required=False)
 
 # پرامپت جدید با تمرکز بر ویرایش و ایزوله‌سازی اطلاعات
 AI_SYSTEM_PROMPT = """You are a highly intelligent, Persian-speaking conversational assistant with a stable, warm, and natural female persona.
